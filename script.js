@@ -339,6 +339,31 @@ class PlayPiece {
                 break;
         }
     }
+
+    rotate(){
+        this.rotation += 1;
+        if(this.rotation > 3) {
+            this.rotation = 0;
+        }
+        this.updatePoints();
+    }
+
+    show() {
+        for(let i = 0; i < this.pieces.length; i++) {
+            this.pieces[i].show();
+        }
+        for(let i = 0; i < this.nextPiece.length; i++) {
+            this.nextPieces[i].show();
+        }
+    }
+
+    commitShape() {
+        for(let i = 0; i < this.pieces.length; i++) {
+            gridPieces.push(this.pieces[i]);
+        }
+        this.resetPiece();
+        analyzeGrid();
+    }
 }
 
 
