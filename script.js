@@ -6,7 +6,7 @@ let linFades = [];
 let gridWorkers = [];
 
 let currentScore = 0;
-let currentLevel = 0;
+let currentLevel = 1;
 let linesCleared = 0;
 
 let ticks = 0;
@@ -31,9 +31,9 @@ const colors = [
 ];
 
 function setup() {
-    creatCanvas(600, 450);
+    createCanvas(600, 450);
 
-    fallingPiece = new playPiece();
+    fallingPiece = new PlayPiece();
     fallingPiece.resetPiece();
 
     textFont('ubuntu');
@@ -45,7 +45,7 @@ function draw() {
     const colorLight = '#304550';
     const backgroundColor = '#e1eeb0';
 
-    backgound(backgroundColor);
+    background(backgroundColor);
 
     //right side
     fill(25);
@@ -98,7 +98,7 @@ function draw() {
     fill(25);
     noStroke();
     textSize(24);
-    textAlign(CENTERD);
+    textAlign(CENTER);
     text("Score", 525, 85);
     text("Level", 525, 238);
     text("Lines", 525, 308);
@@ -295,8 +295,8 @@ class PlayPiece {
                 xx = this.pos.x + points[i][0] * gridSpace;
                 yy = this.pos.y + points[i][0] * gridSpace
             } else {
-                xx = this.points[i].pos.x + x;
-                yy = this.points[i].pos.y + y;
+                xx = this.pieces[i].pos.x + x;
+                yy = this.pieces[i].pos.y + y;
             }
             if(xx < gameEdgeLeft || xx + gridSpace > gameEdgeRight || yy + gridSpace > height) {
                 return true;
@@ -352,7 +352,7 @@ class PlayPiece {
         for(let i = 0; i < this.pieces.length; i++) {
             this.pieces[i].show();
         }
-        for(let i = 0; i < this.nextPiece.length; i++) {
+        for(let i = 0; i < this.nextPieces.length; i++) {
             this.nextPieces[i].show();
         }
     }
@@ -366,4 +366,112 @@ class PlayPiece {
     }
 }
 
+class Square{
+    constructor(x, y, type){
+        this.pos = createVector(x, y);
+        this.type = type;
+    }
 
+    show() {
+        strokeWeight(2);
+        const colorDark = '#092e1d';
+        const colorMid = colors[this.type];
+
+        fill(colorMid);
+        stroke(25);
+        rect(this.pos.x, this.pos.y, gridSpace - 1, gridSpace - 1);
+
+        noStroke();
+        fill(255);
+        rect(this.pos.x + 6, this.pos.y + 6, 18, 2);
+        rect(this.pos.x + 6, this.pos.y + 6, 2, 16);
+        fill(25);
+        rect(this.pos.x + 6, this.pos.y + 20, 18, 2);
+        rect(this.pos.x + 22, this.pos.y + 6, 2, 16);
+    }
+}
+
+function pseudoRandom(previous) {
+    let roll = Math.floor(Math.random() * 8);
+
+    if(roll === previous || roll === 7){
+        roll = Math.floor(Math.random() * 7);
+    }
+    return roll;
+}
+
+function analyzeGrid() {
+    let score = 0;
+
+    while(checkLines()) {
+        score += 100;
+        linesCleared += 1;
+        if(linesCleared % 10 === 0) {
+            if(updateEveryCurrent > 2) {
+                updateEveryCurrent -= 1;
+            }
+        }
+    }
+    if(score > 100) {
+        score *= 2;
+    }
+    currentScore += score;
+}
+
+function checkLines() {
+    for(let y = 0; y < height; y += gridSpace) {
+        let count = 0;
+
+        for(let i = 0; i < gridPieces.length; i++) {
+            if(gridPieces[i].pos.y === y) {
+                count ++;
+            }
+        }
+    }
+    if(count === 10) {
+        gridPieces = gridPieces.filter(pieces => pieces.pos.y !== y);
+        for(let i = 0; i < gridPieces.length; i++) {
+            if(gridPieces[i].pos.y < y) {
+                gridPieces[i].pos.y += gridPieces;
+            }
+        }
+        return true;
+    }
+    return false;
+}
+
+class worker{
+    constructor(y, amount){
+        this.amountTotal = amount;
+        this.yVal = y;
+    }
+
+    work() {
+        if(this.amountActual < this.amountTotal) {
+            for(let j = 0; j < gridPieces.length; j++) {
+                if(gridPieces[j].pos.y < y) {
+                    gridPieces[j].pos.y += 5;
+                }
+            }
+            this.amountActual += 5;
+        } else {
+            gridWorkers.shift();
+        }
+    }
+}
+
+function resetGame() {
+    fallingPiece = new PlayPiece();
+    fallingPiece.resetPiece();
+    gridPieces = [];
+    linFades = [];
+    gridWorkers = [];
+    currentScore = [];
+    linesCleared = [];
+    ticks = 0;
+    updateEvery = 0;
+    updateEveryCurrent = 15;
+    fallSpeed = gridSpace * 0.5;
+    pauseGame = false;
+    gameOver = false;
+}
