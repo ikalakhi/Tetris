@@ -2,7 +2,7 @@ const gridSpace = 30;
 
 let fallingPiece;
 let gridPieces = [];
-let linFades = [];
+let lineFades = [];
 let gridWorkers = [];
 
 let currentScore = 0;
@@ -19,7 +19,6 @@ let gameOver = false;
 const gameEdgeLeft = 150;
 const gameEdgeRight = 450;
 
-//pieces color
 const colors = [
     '#dca3ff',
     '#ff90a0',
@@ -31,70 +30,56 @@ const colors = [
 ];
 
 function setup() {
-    createCanvas(600, 450);
+    createCanvas(600, 540);
 
     fallingPiece = new PlayPiece();
     fallingPiece.resetPiece();
 
-    textFont('ubuntu');
+    textFont('Ubuntu');
 }
-
 
 function draw() {
     const colorDark = '#0d0d0d';
     const colorLight = '#304550';
-    const backgroundColor = '#e1eeb0';
+    const colorBackground = '#e1eeb0';
 
-    background(backgroundColor);
+    background(colorBackground);
 
-    //right side
     fill(25);
     noStroke();
     rect(gameEdgeRight, 0, 150, height);
 
-    //left side
     rect(0, 0, gameEdgeLeft, height);
 
-    //score rect
-    fill(backgroundColor);
+    fill(colorBackground);
     rect(450, 80, 150, 70);
 
-    //next piece
     rect(460, 405, 130, 130, 5, 5);
-    
-    //level
+
     rect(460, 210, 130, 60, 5, 5);
 
-    //lines
-    rect(480, 280, 130, 60, 5, 5);
+    rect(460, 280, 130, 60, 5, 5);
 
-    //score lines
     fill(colorLight);
     rect(450, 85, 150, 20);
     rect(450, 110, 150, 4);
     rect(450, 140, 150, 4);
 
-    //score banner
-    fill(backgroundColor);
+    fill(colorBackground);
     rect(460, 60, 130, 35, 5, 5);
 
-    //score banner inner rect
     strokeWeight(3);
     noFill();
-    stroke();
+    stroke(colorLight);
     rect(465, 65, 120, 25, 5, 5);
 
-    //next piece inner rect
     stroke(colorLight);
-    rect(456, 410, 120, 120, 5, 5);
+    rect(465, 410, 120, 120, 5, 5);
 
-    //level inner rect
     rect(465, 215, 120, 50, 5, 5);
 
-    //line inner rect
     rect(465, 285, 120, 50, 5, 5);
 
-    //info lables
     fill(25);
     noStroke();
     textSize(24);
@@ -103,53 +88,44 @@ function draw() {
     text("Level", 525, 238);
     text("Lines", 525, 308);
 
-    //the actual info
     textSize(24);
     textAlign(RIGHT);
     text(currentScore, 560, 135);
     text(currentLevel, 560, 260);
     text(linesCleared, 560, 330);
 
-    //game border
     stroke(colorDark);
     line(gameEdgeRight, 0, gameEdgeRight, height);
 
-    //falling piece
     fallingPiece.show();
 
-    //falling piece when arrow is pressed
     if (keyIsDown(DOWN_ARROW)) {
         updateEvery = 2;
     } else {
         updateEvery = updateEveryCurrent;
     }
 
-    //update the game state
     if (!pauseGame) {
         ticks++;
-        if(ticks >= updateEvery) {
+        if (ticks >= updateEvery) {
             ticks = 0;
             fallingPiece.fall(fallSpeed);
         }
     }
 
-    //grid pieces
-    for(i = 0; i < gridPieces.length; i++) {
+    for (let i = 0; i < gridPieces.length; i++) {
         gridPieces[i].show();
     }
 
-    //fading lines
-    for(i = 0; i < linFades.length; i++) {
-        linFades[i].show();
+    for (let i = 0; i < lineFades.length; i++) {
+        lineFades[i].show();
     }
 
-    //process grid workers
-    if(gridWorkers > 0) {
+    if (gridWorkers.length > 0) {
         gridWorkers[0].work();
     }
 
-    //controls guide
-    textAlign(CENTERD);
+    textAlign(CENTER);
     fill(255);
     noStroke();
     textSize(14);
@@ -159,40 +135,36 @@ function draw() {
     text("Down:\nfall faster", 75, 330);
     text("R:\nreset game", 75, 380);
 
-    //game over text
-    if(gameOver) {
+    if (gameOver) {
         fill(colorDark);
         textSize(54);
-        textAlign(CENTERD);
+        textAlign(CENTER);
         text("Game Over!", 300, 270);
     }
 
-    //game borer
     strokeWeight(3);
     stroke('#304550');
     noFill();
     rect(0, 0, width, height);
 }
 
-
 function keyPressed() {
-    if(keyCode === 82) {
-        //R key
+    if (keyCode === 82) {
+        // 'R' key
         resetGame();
     }
-    if(!pauseGame) {
-        if(keyCode == LEFT_ARROW) {
+    if (!pauseGame) {
+        if (keyCode === LEFT_ARROW) {
             fallingPiece.input(LEFT_ARROW);
-        } else if(keyCode == RIGHT_ARROW) {
+        } else if (keyCode === RIGHT_ARROW) {
             fallingPiece.input(RIGHT_ARROW);
         }
-        if(keyCode == UP_ARROW) {
+        if (keyCode === UP_ARROW) {
             fallingPiece.input(UP_ARROW);
         }
     }
 }
 
-//class for the faling piece
 class PlayPiece {
     constructor() {
         this.pos = createVector(0, 0);
@@ -202,7 +174,7 @@ class PlayPiece {
         this.pieceType = 0;
         this.pieces = [];
         this.orientation = [];
-        this.fallen = false; 
+        this.fallen = false;
     }
 
     nextPiece() {
@@ -212,27 +184,28 @@ class PlayPiece {
         const points = orientPoints(this.nextPieceType, 0);
         let xx = 525, yy = 490;
 
-        if(this.nextPieceType !== 0 && this.nextPieceType !== 3 && this.nextPieceType !== 5) {
+        if (this.nextPieceType !== 0 && this.nextPieceType !== 3 && this.nextPieceType !== 5) {
             xx += (gridSpace * 0.5);
         }
-        if(this.nextPieceType == 5) {
+
+        if (this.nextPieceType == 5) {
             xx -= (gridSpace * 0.5);
         }
 
-        for(let i = 0; i < 4; i++) {
-            this.nextPieces.push(new Square(xx + points[i][0] * gridSpace, yy * points[i][1] * gridSpace, this.nextPieceType));
+        for (let i = 0; i < 4; i++) {
+            this.nextPieces.push(new Square(xx + points[i][0] * gridSpace, yy + points[i][1] * gridSpace, this.nextPieceType));
         }
     }
 
     fall(amount) {
-        if(!this.futureCollision(0, amount, this.rotation)) {
+        if (!this.futureCollision(0, amount, this.rotation)) {
             this.addPos(0, amount);
             this.fallen = true;
-        }else{
-            if(!this.fallen) {
+        } else {
+            if (!this.fallen) {
                 pauseGame = true;
                 gameOver = true;
-            }else{
+            } else {
                 this.commitShape();
             }
         }
@@ -251,20 +224,20 @@ class PlayPiece {
     }
 
     newPoints() {
-        const points = this.orientation(this.pieceType, this.rotation);
+        const points = orientPoints(this.pieceType, this.rotation);
         this.orientation = points;
         this.pieces = [];
 
-        for(let i = 0; i < points.length; i++) {
+        for (let i = 0; i < points.length; i++) {
             this.pieces.push(new Square(this.pos.x + points[i][0] * gridSpace, this.pos.y + points[i][1] * gridSpace, this.pieceType));
         }
     }
 
     updatePoints() {
-        if(this.pieces) {
+        if (this.pieces) {
             const points = orientPoints(this.pieceType, this.rotation);
             this.orientation = points;
-            for(let i = 0; i < 4; i++) {
+            for (let i = 0; i < 4; i++) {
                 this.pieces[i].pos.x = this.pos.x + points[i][0] * gridSpace;
                 this.pieces[i].pos.y = this.pos.y + points[i][1] * gridSpace;
             }
@@ -275,8 +248,8 @@ class PlayPiece {
         this.pos.x += x;
         this.pos.y += y;
 
-        if(this.pieces) {
-            for(let i = 0; i < 4; i++) {
+        if (this.pieces) {
+            for (let i = 0; i < 4; i++) {
                 this.pieces[i].pos.x += x;
                 this.pieces[i].pos.y += y;
             }
@@ -285,29 +258,27 @@ class PlayPiece {
 
     futureCollision(x, y, rotation) {
         let xx, yy, points = 0;
-
-        if(rotation !== this.rotation) {
-            points = this.orientation(this.pieceType, rotation);
+        if (rotation !== this.rotation) {
+            points = orientPoints(this.pieceType, rotation);
         }
 
-        for(let i = 0; i < this.pieces.length; i++) {
-            if(points) {
+        for (let i = 0; i < this.pieces.length; i++) {
+            if (points) {
                 xx = this.pos.x + points[i][0] * gridSpace;
-                yy = this.pos.y + points[i][0] * gridSpace
+                yy = this.pos.y + points[i][1] * gridSpace;
             } else {
                 xx = this.pieces[i].pos.x + x;
                 yy = this.pieces[i].pos.y + y;
             }
-            if(xx < gameEdgeLeft || xx + gridSpace > gameEdgeRight || yy + gridSpace > height) {
+            if (xx < gameEdgeLeft || xx + gridSpace > gameEdgeRight || yy + gridSpace > height) {
                 return true;
             }
-
-            for(let j = 0; j < gridSpace.length; j++) {
-                if(xx === gridPieces[j].pos.x) {
-                    if(yy >= gridPieces[j].pos.y && yy < gridPieces[j].pos.y + gridSpace) {
+            for (let j = 0; j < gridPieces.length; j++) {
+                if (xx === gridPieces[j].pos.x) {
+                    if (yy >= gridPieces[j].pos.y && yy < gridPieces[j].pos.y + gridSpace) {
                         return true;
                     }
-                    if(yy + gridSpace > gridPieces[j].pos.y && yy + gridSpace <= gridPieces[j].pos.y + gridSpace) {
+                    if (yy + gridSpace > gridPieces[j].pos.y && yy + gridSpace <= gridPieces[j].pos.y + gridSpace) {
                         return true;
                     }
                 }
@@ -318,21 +289,21 @@ class PlayPiece {
     input(key) {
         switch (key) {
             case LEFT_ARROW:
-                if(!this.futureCollision(-gridSpace, 0, this.rotation)) {
+                if (!this.futureCollision(-gridSpace, 0, this.rotation)) {
                     this.addPos(-gridSpace, 0);
                 }
                 break;
             case RIGHT_ARROW:
-                if(!this.futureCollision(gridSpace, 0, this.rotation)) {
+                if (!this.futureCollision(gridSpace, 0, this.rotation)) {
                     this.addPos(gridSpace, 0);
                 }
                 break;
             case UP_ARROW:
                 let newRotation = this.rotation + 1;
-                if(newRotation > 3) {
+                if (newRotation > 3) {
                     newRotation = 0;
                 }
-                if(!this.futureCollision(0, 0, newRotation)) {
+                if (!this.futureCollision(0, 0, newRotation)) {
                     this.rotation = newRotation;
                     this.updatePoints();
                 }
@@ -340,25 +311,25 @@ class PlayPiece {
         }
     }
 
-    rotate(){
+    rotate() {
         this.rotation += 1;
-        if(this.rotation > 3) {
+        if (this.rotation > 3) {
             this.rotation = 0;
         }
         this.updatePoints();
     }
 
     show() {
-        for(let i = 0; i < this.pieces.length; i++) {
+        for (let i = 0; i < this.pieces.length; i++) {
             this.pieces[i].show();
         }
-        for(let i = 0; i < this.nextPieces.length; i++) {
+        for (let i = 0; i < this.nextPieces.length; i++) {
             this.nextPieces[i].show();
         }
     }
 
     commitShape() {
-        for(let i = 0; i < this.pieces.length; i++) {
+        for (let i = 0; i < this.pieces.length; i++) {
             gridPieces.push(this.pieces[i]);
         }
         this.resetPiece();
@@ -366,8 +337,8 @@ class PlayPiece {
     }
 }
 
-class Square{
-    constructor(x, y, type){
+class Square {
+    constructor(x, y, type) {
         this.pos = createVector(x, y);
         this.type = type;
     }
@@ -393,8 +364,7 @@ class Square{
 
 function pseudoRandom(previous) {
     let roll = Math.floor(Math.random() * 8);
-
-    if(roll === previous || roll === 7){
+    if (roll === previous || roll === 7) {
         roll = Math.floor(Math.random() * 7);
     }
     return roll;
@@ -402,54 +372,54 @@ function pseudoRandom(previous) {
 
 function analyzeGrid() {
     let score = 0;
-
-    while(checkLines()) {
+    while (checkLines()) {
         score += 100;
         linesCleared += 1;
-        if(linesCleared % 10 === 0) {
-            if(updateEveryCurrent > 2) {
-                updateEveryCurrent -= 1;
+        if (linesCleared % 10 === 0) {
+            currentLevel += 1;
+            if (updateEveryCurrent > 2) {
+                updateEveryCurrent -= 10;
             }
         }
     }
-    if(score > 100) {
+    if (score > 100) {
         score *= 2;
     }
     currentScore += score;
 }
 
 function checkLines() {
-    for(let y = 0; y < height; y += gridSpace) {
+    for (let y = 0; y < height; y += gridSpace) {
         let count = 0;
-
-        for(let i = 0; i < gridPieces.length; i++) {
-            if(gridPieces[i].pos.y === y) {
-                count ++;
+        for (let i = 0; i < gridPieces.length; i++) {
+            if (gridPieces[i].pos.y === y) {
+                count++;
             }
         }
-    }
-    if(count === 10) {
-        gridPieces = gridPieces.filter(pieces => pieces.pos.y !== y);
-        for(let i = 0; i < gridPieces.length; i++) {
-            if(gridPieces[i].pos.y < y) {
-                gridPieces[i].pos.y += gridPieces;
+        if (count === 10) {
+            gridPieces = gridPieces.filter(piece => piece.pos.y !== y);
+            for (let i = 0; i < gridPieces.length; i++) {
+                if (gridPieces[i].pos.y < y) {
+                    gridPieces[i].pos.y += gridSpace;
+                }
             }
+            return true;
         }
-        return true;
     }
     return false;
 }
 
-class worker{
-    constructor(y, amount){
+class Worker {
+    constructor(y, amount) {
+        this.amountActual = 0;
         this.amountTotal = amount;
         this.yVal = y;
     }
 
     work() {
-        if(this.amountActual < this.amountTotal) {
-            for(let j = 0; j < gridPieces.length; j++) {
-                if(gridPieces[j].pos.y < y) {
+        if (this.amountActual < this.amountTotal) {
+            for (let j = 0; j < gridPieces.length; j++) {
+                if (gridPieces[j].pos.y < y) {
                     gridPieces[j].pos.y += 5;
                 }
             }
@@ -464,12 +434,13 @@ function resetGame() {
     fallingPiece = new PlayPiece();
     fallingPiece.resetPiece();
     gridPieces = [];
-    linFades = [];
+    lineFades = [];
     gridWorkers = [];
-    currentScore = [];
-    linesCleared = [];
+    currentScore = 0;
+    currentLevel = 1;
+    linesCleared = 0;
     ticks = 0;
-    updateEvery = 0;
+    updateEvery = 15;
     updateEveryCurrent = 15;
     fallSpeed = gridSpace * 0.5;
     pauseGame = false;
